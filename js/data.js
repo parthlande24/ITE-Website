@@ -56,7 +56,10 @@ ITE.Data = (function () {
       {name:'Priya Gupta',rollNo:'24BCE010',email:'priya.gupta@students.vnit.ac.in'},
     ];
 
-    const teams = [];
+    const teams = [
+      {id:t1,startupName:'AgriTech Connect',problemStatement:'Small farmers lack real-time market data...',solution:'A mobile app providing direct market links and weather alerts.',industry:'Agriculture',stage:2,ceoId:s1,mentorId:m1,members:[{userId:s1,teamRole:'CEO',isCEO:true},{userId:s2,teamRole:'CTO',isCEO:false},{userId:s3,teamRole:'CFO',isCEO:false},{userId:s4,teamRole:'CMO',isCEO:false}],createdAt:'2024-06-10'},
+      {id:t2,startupName:'EduBridge',problemStatement:'Students in tier-2 cities lack quality education...',solution:'Personalized adaptive online learning platforms.',industry:'Education',stage:4,ceoId:s5,mentorId:m2,members:[{userId:s5,teamRole:'CEO',isCEO:true},{userId:s6,teamRole:'CTO',isCEO:false},{userId:s7,teamRole:'CFO',isCEO:false}],createdAt:'2024-06-10'},
+    ];
 
     const ann1 = uid(), ann2 = uid(), ann3 = uid(), ann4 = uid(), ann5 = uid();
     const announcements = [

@@ -45,7 +45,7 @@ def sent_invites(db: Session = Depends(get_db), current_user: User = Depends(get
 @router.post("")
 def send_invite(body: SendInviteRequest, db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_user)):
-    if not current_user.is_ceo and current_user.role != "admin":
+    if not current_user.is_ceo and current_user.team_role != "CEO" and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Only CEOs can send invitations")
     # Find CEO's team
     team = db.query(Team).filter(Team.ceo_id == current_user.id).first()

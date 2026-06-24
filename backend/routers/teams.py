@@ -119,7 +119,21 @@ def update_team(team_id: str, body: UpdateTeamRequest, db: Session = Depends(get
     if body.problemStatement is not None: t.problem_statement = body.problemStatement
     if body.solution is not None:         t.solution = body.solution
     if body.industry is not None:         t.industry = body.industry
-    if body.ceoId is not None:            t.ceo_id = body.ceoId
+    if body.ceoId is not None:
+        old_ceo_id = t.ceo_id
+        t.ceo_id = body.ceoId
+        if old_ceo_id and old_ceo_id != body.ceoId:
+            old_ceo = db.query(User).filter(User.id == old_ceo_id).first()
+            if old_ceo:
+                old_ceo.is_ceo = False
+                if old_ceo.team_role == "CEO":
+                    old_ceo.team_role = None
+        if body.ceoId:
+            new_ceo = db.query(User).filter(User.id == body.ceoId).first()
+            if new_ceo:
+                new_ceo.is_ceo = True
+                new_ceo.team_role = "CEO"
+                new_ceo.team_id = team_id
     if body.mentorId is not None:         t.mentor_id = body.mentorId
     if body.members is not None:          t.members = body.members
     db.commit()
