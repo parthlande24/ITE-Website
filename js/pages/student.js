@@ -185,7 +185,7 @@ ${pendingInvites.length>0?`<div style="margin-bottom:16px">${pendingInvites.map(
       </div>
       <div style="display:grid;gap:8px">
         ${members.map(m=>`<div class="member-card"><div class="member-avatar" style="background:${ITE.App.roleColor(m.teamRole)}">${m.avatar||'?'}</div><div class="member-info"><div class="member-name">${m.name||''} ${m.userId===user.id?'<span style="font-size:.65rem;color:var(--accent)">(You)</span>':''}</div><div class="member-sub">${m.rollNo||''} · ${m.branch||''}</div></div><span class="badge" style="background:${ITE.App.roleColor(m.teamRole)}22;color:${ITE.App.roleColor(m.teamRole)}">${m.teamRole}</span></div>`).join('')}
-        ${members.length<4?`<div style="padding:10px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.8rem;color:var(--text-muted)">${4-members.length} slot${4-members.length!==1?'s':''} available</div>`:''}
+
       </div>
     </div>
 
@@ -283,8 +283,8 @@ ${pendingInvites.length>0?`<div style="margin-bottom:16px">${pendingInvites.map(
       ]);
       if (!team) { ITE.App.toast('No team found.','warning'); return; }
       const existingRoles = (team.members || []).map(m=>m.teamRole||m.role);
-      const availableRoles = ['CTO','CFO','CMO'].filter(r=>!existingRoles.includes(r));
-      if (!availableRoles.length) { ITE.App.toast('All executive roles are filled!','info'); return; }
+      const allRoles = ['CTO','CFO','CMO','COO','VP Engineering','VP Marketing','VP Operations','Lead Designer','Lead Developer','Member'];
+      const availableRoles = allRoles.filter(r=>!existingRoles.includes(r));
       
       const eligibleStudents = allStudents.filter(s=>s.id!==user.id && !(team.members||[]).some(m=>m.userId===s.id) && (!s.teamId || s.teamId === 'null'));
       

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db
-from models import User, Team
+from models import User, Team, Invitation
 from routers.auth import get_current_user, user_to_dict
 import uuid
 
@@ -163,6 +163,32 @@ def delete_team(team_id: str, db: Session = Depends(get_db),
     t = db.query(Team).filter(Team.id == team_id).first()
     if not t:
         raise HTTPException(status_code=404, detail="Team not found")
+
+    # ── Cascading cleanup: reset all users associated with this team ──────────
+    associated_users = db.query(User).filter(User.team_id == team_id).all()
+    for user in associated_users:
+        user.team_id = None
+        user.team_role = None
+        user.is_ceo = False
+        user.mentor_id = None
+
+    # Also clean up the CEO if they weren't caught by team_id filter
+    if t.ceo_id:
+        ceo = db.query(User).filter(User.id == t.ceo_id).first()
+        if ceo:
+            ceo.team_id = None
+            ceo.team_role = None
+            ceo.is_ceo = False
+
+    # Delete all invitations associated with this team
+    db.query(Invitation).filter(Invitation.team_id == team_id).delete()
+
+    # Unassign the team from its mentor's assigned_teams list
+    if t.mentor_id:
+        mentor = db.query(User).filter(User.id == t.mentor_id).first()
+        if mentor and mentor.assigned_teams:
+            mentor.assigned_teams = [tid for tid in mentor.assigned_teams if tid != team_id]
+
     db.delete(t)
     db.commit()
     return {"success": True}

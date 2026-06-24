@@ -271,12 +271,20 @@ ITE.Pages.Admin = (function () {
     }
   }
 
-  /* ---- Students ---- */
   let _currentStudents = [];
+  let _currentTeamsCache = [];
+  let _currentMentorsCache = [];
   async function renderStudents() {
     ITE.App.pc().innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Loading live students data...</div>`;
     try {
-      _currentStudents = await ITE.API.get('/users/students');
+      const [students, teams, mentors] = await Promise.all([
+        ITE.API.get('/users/students'),
+        ITE.API.get('/teams'),
+        ITE.API.get('/users/mentors')
+      ]);
+      _currentStudents = students;
+      _currentTeamsCache = teams;
+      _currentMentorsCache = mentors;
       ITE.App.pc().innerHTML = `
 <div class="page-header"><div class="page-title">Students</div><div class="page-subtitle">${_currentStudents.length} enrolled students</div></div>
 <div class="card" style="margin-bottom:14px"><div class="search-bar" style="max-width:380px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="stu-search" placeholder="Search by name, roll number, or branch..." oninput="ITE.Pages.Admin._filterStudents()"></div></div>
@@ -288,8 +296,8 @@ ITE.Pages.Admin = (function () {
 
   function _studentRows(list) {
     return list.map(s=>{
-      const team=s.teamId?ITE.Data.getTeamById(s.teamId):null;
-      const mentor=s.mentorId?ITE.Data.getUserById(s.mentorId):null;
+      const team=s.teamId ? _currentTeamsCache.find(t=>t.id===s.teamId) : null;
+      const mentor=s.mentorId ? _currentMentorsCache.find(m=>m.id===s.mentorId) : null;
       return`<tr><td><div style="display:flex;align-items:center;gap:9px"><div style="width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#FFF;flex-shrink:0">${s.avatar}</div><div><div style="font-weight:600">${s.name}</div><div style="font-size:.72rem;color:var(--text-muted)">${s.email}</div></div></div></td><td>${s.rollNo||'—'}</td><td>${s.branch||'—'}</td><td>${team?team.startupName:`<span style="color:var(--text-muted)">Unassigned</span>`}</td><td>${s.teamRole?`<span class="badge badge-blue">${s.teamRole}</span>`:'—'}</td><td>${mentor?mentor.name:`<span style="color:var(--text-muted)">Unassigned</span>`}</td><td><span class="badge ${s.teamId?'badge-green':'badge-yellow'}">${s.teamId?'Assigned':'Unassigned'}</span></td><td><div style="display:flex;gap:7px"><button class="btn btn-ghost btn-sm" onclick="ITE.Pages.Admin.showEditStudent('${s.id}', '${(s.name||'').replace(/'/g,'')}', '${(s.rollNo||'').replace(/'/g,'')}', '${(s.branch||'').replace(/'/g,'')}', '${(s.email||'').replace(/'/g,'')}')">Edit</button><button class="btn btn-danger btn-sm" onclick="ITE.Pages.Admin._deleteStudent('${s.id}')">Remove</button></div></td></tr>`;
     }).join('');
   }

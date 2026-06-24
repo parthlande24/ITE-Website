@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer, Float, JSON
+from sqlalchemy import Column, String, Text, Boolean, Integer, Float, JSON
 from database import Base
 import datetime
 
@@ -46,8 +46,8 @@ class Team(Base):
 
     id                = Column(String, primary_key=True, index=True)
     startup_name      = Column(String, nullable=False)
-    problem_statement = Column(String, nullable=True)
-    solution          = Column(String, nullable=True)
+    problem_statement = Column(Text, nullable=True)
+    solution          = Column(Text, nullable=True)
     industry          = Column(String, nullable=True)
     stage             = Column(Integer, default=0)
     ceo_id            = Column(String, nullable=True)
@@ -73,7 +73,7 @@ class Task(Base):
 
     id            = Column(String, primary_key=True, index=True)
     title         = Column(String, nullable=False)
-    description   = Column(String, nullable=True)
+    description   = Column(Text, nullable=True)
     due_date      = Column(String, nullable=True)
     stage         = Column(Integer, nullable=True)
     created_by_id = Column(String, nullable=True)
@@ -88,11 +88,11 @@ class Submission(Base):
     team_id      = Column(String, nullable=False)
     task_id      = Column(String, nullable=True)
     title        = Column(String, nullable=False)
-    content      = Column(String, nullable=True)
+    content      = Column(Text, nullable=True)
     file_url     = Column(String, nullable=True)
     status       = Column(String, default="pending")
     grade        = Column(Float, nullable=True)
-    feedback     = Column(String, nullable=True)
+    feedback     = Column(Text, nullable=True)
     submitted_at = Column(String, default=lambda: datetime.datetime.utcnow().isoformat())
     graded_at    = Column(String, nullable=True)
 
@@ -102,7 +102,7 @@ class Announcement(Base):
 
     id              = Column(String, primary_key=True, index=True)
     title           = Column(String, nullable=False)
-    body            = Column(String, nullable=True)
+    body            = Column(Text, nullable=True)
     created_by_id   = Column(String, nullable=False)
     created_by_role = Column(String, nullable=False)
     created_by_name = Column(String, nullable=False)
@@ -116,7 +116,7 @@ class PrevStartup(Base):
 
     id          = Column(String, primary_key=True, index=True)
     name        = Column(String, nullable=False)
-    description = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
     industry    = Column(String, nullable=True)
     year        = Column(Integer, nullable=True)
     founders    = Column(JSON, default=list)
