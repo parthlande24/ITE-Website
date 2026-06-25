@@ -11,10 +11,14 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 
 def task_to_dict(t: Task) -> dict:
+    stages = ["Foundation", "Research", "Validation", "Development", "Pitching"]
+    category = stages[t.stage] if (t.stage is not None and 0 <= t.stage < len(stages)) else "Task"
     return {
         "id": t.id, "title": t.title, "description": t.description,
         "dueDate": t.due_date, "stage": t.stage,
         "createdById": t.created_by_id, "createdAt": t.created_at,
+        "teamId": t.team_id,
+        "category": category,
     }
 
 
@@ -33,8 +37,19 @@ class UpdateTaskRequest(BaseModel):
 
 
 @router.get("")
-def list_tasks(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return [task_to_dict(t) for t in db.query(Task).all()]
+def list_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role == "student":
+        from sqlalchemy import or_
+        tasks = db.query(Task).filter(
+            or_(
+                Task.team_id == None,
+                Task.team_id == "",
+                Task.team_id == current_user.team_id
+            )
+        ).all()
+    else:
+        tasks = db.query(Task).all()
+    return [task_to_dict(t) for t in tasks]
 
 
 @router.post("")

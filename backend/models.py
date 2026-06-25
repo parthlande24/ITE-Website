@@ -77,6 +77,7 @@ class Task(Base):
     due_date      = Column(String, nullable=True)
     stage         = Column(Integer, nullable=True)
     created_by_id = Column(String, nullable=True)
+    team_id       = Column(String, nullable=True)
     created_at    = Column(String, default=lambda: datetime.datetime.utcnow().isoformat())
 
 

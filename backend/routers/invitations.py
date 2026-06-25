@@ -9,12 +9,17 @@ import uuid
 router = APIRouter(prefix="/api/invitations", tags=["invitations"])
 
 
-def inv_to_dict(i: Invitation) -> dict:
-    return {
+def inv_to_dict(i: Invitation, db: Session = None) -> dict:
+    d = {
         "id": i.id, "teamId": i.team_id, "fromUserId": i.from_user_id,
         "toUserId": i.to_user_id, "role": i.role, "status": i.status,
         "createdAt": i.created_at,
     }
+    if db:
+        team = db.query(Team).filter(Team.id == i.team_id).first()
+        if team:
+            d["startup_name"] = team.startup_name
+    return d
 
 
 class SendInviteRequest(BaseModel):
@@ -32,14 +37,14 @@ def pending_invites(db: Session = Depends(get_db), current_user: User = Depends(
         Invitation.to_user_id == current_user.id,
         Invitation.status == "pending"
     ).all()
-    return [inv_to_dict(i) for i in invs]
+    return [inv_to_dict(i, db) for i in invs]
 
 @router.get("/sent")
 def sent_invites(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     invs = db.query(Invitation).filter(
         Invitation.from_user_id == current_user.id
     ).all()
-    return [inv_to_dict(i) for i in invs]
+    return [inv_to_dict(i, db) for i in invs]
 
 
 @router.post("")
@@ -62,7 +67,7 @@ def send_invite(body: SendInviteRequest, db: Session = Depends(get_db),
     )
     db.add(inv)
     db.commit()
-    return inv_to_dict(inv)
+    return inv_to_dict(inv, db)
 
 
 @router.patch("/{inv_id}")
@@ -87,5 +92,6 @@ def respond_invite(inv_id: str, body: RespondInviteRequest, db: Session = Depend
             team.members = members
             current_user.team_id = team.id
             current_user.team_role = inv.role
+            current_user.mentor_id = team.mentor_id
     db.commit()
-    return inv_to_dict(inv)
+    return inv_to_dict(inv, db)

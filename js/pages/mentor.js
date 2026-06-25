@@ -70,7 +70,10 @@ myAnns.slice(0,3).map(a=>`<div class="ann-card ${a.createdByRole}-ann"><div clas
       const myTeams = teams.filter(t => t.mentorId === user.id);
       
       ITE.App.pc().innerHTML = `
-<div class="page-header"><div class="page-title">My Teams</div><div class="page-subtitle">${myTeams.length} venture${myTeams.length!==1?'s':''} under your mentorship</div></div>
+<div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
+  <div><div class="page-title">My Teams</div><div class="page-subtitle">${myTeams.length} venture${myTeams.length!==1?'s':''} under your mentorship</div></div>
+  ${myTeams.length>0?`<button class="btn btn-primary" onclick="ITE.Pages.Mentor.showAssignTaskModal(null, 'all-my-teams')">Assign Task to All</button>`:''}
+</div>
 ${myTeams.length===0?`<div class="empty-state card"><h3>No teams assigned</h3></div>`:
 myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
     } catch(err) {
@@ -94,6 +97,7 @@ myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="ITE.Pages.Mentor.showAssignCEO('${team.id}')">Assign CEO</button>
+      <button class="btn btn-ghost btn-sm" onclick="ITE.Pages.Mentor.showAssignTaskModal('${team.id}', 'single-team')">Assign Task</button>
       <button class="btn btn-primary btn-sm" onclick="ITE.Pages.Mentor._advanceStage('${team.id}', ${team.stage||0})">Advance Stage</button>
     </div>
   </div>
@@ -130,6 +134,7 @@ myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Members</div><div style="display:grid;gap:7px">${members.map(m=>`<div class="member-card"><div class="member-avatar" style="background:${ITE.App.roleColor(m.teamRole)}">${m.avatar}</div><div class="member-info"><div class="member-name">${m.name}</div><div class="member-sub">${m.rollNo} · ${m.branch}</div></div><span class="badge" style="background:${ITE.App.roleColor(m.teamRole)}22;color:${ITE.App.roleColor(m.teamRole)}">${m.teamRole}</span></div>`).join('')}</div></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost btn-sm" onclick="ITE.App.closeModal();ITE.Pages.Mentor.showAssignCEO('${team.id}')">Assign CEO</button>
+      <button class="btn btn-ghost btn-sm" onclick="ITE.App.closeModal();ITE.Pages.Mentor.showAssignTaskModal('${team.id}', 'single-team')">Assign Task</button>
       ${(team.stage||0)<4?`<button class="btn btn-primary btn-sm" onclick="ITE.App.closeModal();ITE.Pages.Mentor._advanceStage('${team.id}', ${team.stage||0})">Advance Stage</button>`:`<span class="badge badge-green">Complete</span>`}
     </div>
   </div>
@@ -274,9 +279,59 @@ myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
     }
   }
 
+  function showAssignTaskModal(teamId, scope) {
+    const title = scope === 'all-my-teams' ? 'Assign Task to All My Teams' : 'Assign Task to Team';
+    const submitCall = `ITE.Pages.Mentor._submitMentorTask('${teamId || ''}', '${scope}')`;
+    
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    const defaultDate = nextWeek.toISOString().split('T')[0];
+
+    ITE.App.showModal(`<div class="modal">
+<div class="modal-header"><div class="modal-title">${title}</div><button class="modal-close btn">✕</button></div>
+<div class="modal-body">
+  <div class="form-group"><label class="form-label">Task Title *</label><input id="mt-title" class="form-control" placeholder="e.g. Design Wireframes"></div>
+  <div class="form-group"><label class="form-label">Description</label><textarea id="mt-desc" class="form-control" rows="3" placeholder="Describe the expectations, deliverables, and guidelines…"></textarea></div>
+  <div class="form-group"><label class="form-label">Due Date *</label><input type="date" id="mt-due" class="form-control" value="${defaultDate}"></div>
+  <div class="form-group"><label class="form-label">Venture Stage Connection</label><select id="mt-stage" class="form-control"><option value="">None</option>${ITE.App.STAGES.map((s,i)=>`<option value="${i}">Stage ${i+1}: ${s.label}</option>`).join('')}</select></div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="ITE.App.closeModal()">Cancel</button><button class="btn btn-primary" onclick="${submitCall}">Assign Task</button></div>
+</div>`);
+  }
+
+  async function _submitMentorTask(teamId, scope) {
+    const title = document.getElementById('mt-title')?.value?.trim();
+    const description = document.getElementById('mt-desc')?.value?.trim();
+    const dueDate = document.getElementById('mt-due')?.value;
+    const stageVal = document.getElementById('mt-stage')?.value;
+    const stage = stageVal !== "" ? parseInt(stageVal) : null;
+
+    if (!title || !dueDate) {
+      ITE.App.toast('Title and due date are required.', 'error');
+      return;
+    }
+
+    try {
+      await ITE.API.post('/mentor/tasks', {
+        title,
+        description,
+        dueDate,
+        stage,
+        teamId: scope === 'all-my-teams' ? null : teamId,
+        scope
+      });
+      ITE.App.toast('Task(s) assigned successfully!', 'success');
+      ITE.App.closeModal();
+      renderTeams();
+    } catch (err) {
+      ITE.App.toast(err.message, 'error');
+    }
+  }
+
   return {
     renderDashboard, renderTeams, renderAnnouncements,
     showTeamDetail, showAssignCEO, _submitCEO, _advanceStage,
     showMentorAnnModal, _submitMentorAnn,
+    showAssignTaskModal, _submitMentorTask,
   };
 })();

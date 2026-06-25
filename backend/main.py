@@ -12,14 +12,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from database import engine, SessionLocal
+from sqlalchemy import text
 from models import Base
 from seed import seed
 
 # ── Import all routers ────────────────────────────────────────────────────────
-from routers import auth, users, teams, invitations, tasks, submissions, announcements, prev_startups, admin
+from routers import auth, users, teams, invitations, tasks, submissions, announcements, prev_startups, admin, mentor
 
 # ── Create tables & seed ──────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
+
+# Safely add team_id column if it is missing (to support migration on existing DBs)
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE tasks ADD COLUMN team_id VARCHAR;"))
+        conn.commit()
+        print("[DB] Added team_id column to tasks table.")
+    except Exception:
+        pass
+
 db = SessionLocal()
 seed(db)
 db.close()
@@ -50,6 +61,7 @@ app.include_router(submissions.router)
 app.include_router(announcements.router)
 app.include_router(prev_startups.router)
 app.include_router(admin.router)
+app.include_router(mentor.router)
 
 
 @app.get("/api/health")

@@ -42,7 +42,16 @@ def list_users(db: Session = Depends(get_db), current_user: User = Depends(get_c
 
 @router.get("/students")
 def list_students(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return [user_to_dict(u) for u in db.query(User).filter(User.role == "student").all()]
+    students = db.query(User).filter(User.role == "student").all()
+    res = []
+    for u in students:
+        d = user_to_dict(u)
+        if not d.get("mentorId") and u.team_id:
+            team = db.query(Team).filter(Team.id == u.team_id).first()
+            if team:
+                d["mentorId"] = team.mentor_id
+        res.append(d)
+    return res
 
 
 @router.get("/mentors")
