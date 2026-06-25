@@ -31,7 +31,7 @@ with engine.connect() as conn:
     except Exception:
         pass
     try:
-        conn.execute(text("ALTER TABLE submissions ALTER COLUMN grade TYPE VARCHAR;"))
+        conn.execute(text("ALTER TABLE submissions ALTER COLUMN grade TYPE VARCHAR USING grade::VARCHAR;"))
         conn.commit()
         print("[DB] Altered grade column to VARCHAR in submissions table.")
     except Exception:
