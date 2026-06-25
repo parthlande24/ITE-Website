@@ -36,6 +36,13 @@ with engine.connect() as conn:
         print("[DB] Altered grade column to VARCHAR in submissions table.")
     except Exception:
         pass
+    try:
+        conn.execute(text("ALTER TABLE users DROP CONSTRAINT IF EXISTS check_user_role;"))
+        conn.execute(text("ALTER TABLE users ADD CONSTRAINT check_user_role CHECK (role IN ('admin', 'mentor', 'student', 'non-ite'));"))
+        conn.commit()
+        print("[DB] Updated users role check constraint to include 'non-ite'.")
+    except Exception:
+        pass
 
 db = SessionLocal()
 seed(db)

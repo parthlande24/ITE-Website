@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, Boolean, Integer, Float, JSON
+from sqlalchemy import Column, String, Text, Boolean, Integer, Float, JSON, CheckConstraint
 from database import Base
 import datetime
 
@@ -7,6 +7,9 @@ import datetime
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("role IN ('admin', 'mentor', 'student', 'non-ite')", name="check_user_role"),
+    )
 
     id              = Column(String, primary_key=True, index=True)
     email           = Column(String, unique=True, index=True, nullable=False)

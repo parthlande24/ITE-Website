@@ -108,6 +108,13 @@ ITE.App = (function () {
       };
       return (map[hash] || map['/'])();
     }
+    if (user.role === 'non-ite') {
+      const map = {
+        '/': () => navigate('/non-ite/dashboard'),
+        '/non-ite/dashboard': () => { setTopbarTitle('Startups Listing'); ITE.Pages.Admin.renderStartups(); }
+      };
+      return (map[hash] || map['/'])();
+    }
     ITE.Pages.Home.render();
   }
 
@@ -167,6 +174,10 @@ ITE.App = (function () {
         { icon: ico_check, label: 'Tasks',        path: '/student/tasks' },
         { icon: ico_bell,  label: 'Announcements',path: '/student/announcements' },
       ];
+    } else if (user.role === 'non-ite') {
+      items = [
+        { icon: ico_rocket, label: 'Startups',    path: '/non-ite/dashboard' },
+      ];
     }
     const nav = document.getElementById('sidebar-nav');
     if (!nav) return;
@@ -178,7 +189,7 @@ ITE.App = (function () {
   function buildSidebarUser(user) {
     const el = document.getElementById('sidebar-user');
     if (!el) return;
-    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student' }[user.role] || 'User';
+    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student', 'non-ite': 'Guest (Non-ITE)' }[user.role] || 'User';
     el.innerHTML = `<div class="sidebar-user-info"><div class="sidebar-avatar">${user.avatar || user.name[0]}</div><div><div class="sidebar-user-name">${user.name}</div><div class="sidebar-user-role">${roleLabel}</div></div></div>`;
   }
 

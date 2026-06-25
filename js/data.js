@@ -41,6 +41,7 @@ ITE.Data = (function () {
       {id:s8,email:'pooja.desai@students.vnit.ac.in',password:'student123',role:'student',name:'Pooja Desai',avatar:'PD',rollNo:'24BCE008',branch:'Chemical',skills:['UI/UX','Figma'],interests:['HealthTech'],teamId:null,teamRole:null,profileComplete:true,mentorId:null,createdAt:'2024-06-10'},
       {id:s9,email:'vikram.rao@students.vnit.ac.in',password:'student123',role:'student',name:'Vikram Rao',avatar:'VR',rollNo:'24BCE009',branch:'Mechanical',skills:['IoT','Embedded'],interests:['AgriTech'],teamId:null,teamRole:null,profileComplete:true,mentorId:null,createdAt:'2024-06-10'},
       {id:s10,email:'priya.gupta@students.vnit.ac.in',password:'student123',role:'student',name:'Priya Gupta',avatar:'PG',rollNo:'24BCE010',branch:'Electronics',skills:['Marketing Analytics'],interests:['Consumer Tech'],teamId:null,teamRole:null,profileComplete:true,mentorId:null,createdAt:'2024-06-10'},
+      {id:uid(),email:'guest@vnit.ac.in',password:'guest123',role:'non-ite',name:'Guest Visitor',avatar:'GV',profileComplete:true,createdAt:'2024-06-01'},
     ];
 
     const approved = [

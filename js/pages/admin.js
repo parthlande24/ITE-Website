@@ -107,10 +107,12 @@ ITE.Pages.Admin = (function () {
     ITE.App.pc().innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Loading live startups data...</div>`;
     try {
       const teams = await ITE.API.get('/teams');
+      const currentUser = ITE.Auth.getCurrentUser();
+      const isNonIte = currentUser && currentUser.role === 'non-ite';
       ITE.App.pc().innerHTML = `
 <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
   <div><div class="page-title">Startups</div><div class="page-subtitle">${teams.length} startup ventures registered</div></div>
-  <button class="btn btn-primary" onclick="ITE.Pages.Admin.showAddStartup()">Add Startup</button>
+  ${isNonIte ? '' : '<button class="btn btn-primary" onclick="ITE.Pages.Admin.showAddStartup()">Add Startup</button>'}
 </div>
 <div class="cards-grid">
   ${teams.length===0?`<div class="empty-state card"><h3>No startups registered yet</h3></div>`:
@@ -144,6 +146,8 @@ ITE.Pages.Admin = (function () {
     try {
       const t = await ITE.API.get('/teams/' + id);
       const members = t.members || [];
+      const currentUser = ITE.Auth.getCurrentUser();
+      const isNonIte = currentUser && currentUser.role === 'non-ite';
       ITE.App.showModal(`<div class="modal modal-lg">
 <div class="modal-header"><div class="modal-title">${t.startupName}</div><button class="modal-close btn">✕</button></div>
 <div class="modal-body">
@@ -156,13 +160,13 @@ ITE.Pages.Admin = (function () {
       <div style="display:grid;gap:7px">${members.map(mb=>`<div class="member-card"><div class="member-avatar" style="background:${ITE.App.roleColor(mb.teamRole)}">${mb.user?.avatar||'?'}</div><div class="member-info"><div class="member-name">${mb.user?.name||'?'}</div><div class="member-sub">${mb.user?.roll_no||''} · ${mb.user?.branch||''}</div></div><span class="badge" style="background:${ITE.App.roleColor(mb.teamRole)}20;color:${ITE.App.roleColor(mb.teamRole)}">${mb.teamRole}</span></div>`).join('')}</div>
     </div>
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px">Mentor</div><p style="font-size:.9rem">${t.mentorName||'Unassigned'}</p></div>
-    ${t.stage<5?`<button class="btn btn-primary btn-sm" onclick="ITE.Pages.Admin.advanceStage('${t.id}', ${t.stage})">Advance Stage</button>`:`<span class="badge badge-green">All Stages Completed</span>`}
+    ${isNonIte ? '' : (t.stage<5?`<button class="btn btn-primary btn-sm" onclick="ITE.Pages.Admin.advanceStage('${t.id}', ${t.stage})">Advance Stage</button>`:`<span class="badge badge-green">All Stages Completed</span>`)}
   </div>
 </div>
 <div class="modal-footer">
   <button class="btn btn-ghost" onclick="ITE.App.closeModal()">Close</button>
-  <button class="btn btn-ghost" onclick="ITE.Pages.Admin.showEditStartup('${t.id}')">Edit</button>
-  <button class="btn btn-danger" onclick="ITE.Pages.Admin.deleteStartup('${t.id}')">Delete</button>
+  ${isNonIte ? '' : `<button class="btn btn-ghost" onclick="ITE.Pages.Admin.showEditStartup('${t.id}')">Edit</button>
+  <button class="btn btn-danger" onclick="ITE.Pages.Admin.deleteStartup('${t.id}')">Delete</button>`}
 </div>
 </div>`);
     } catch(err) {
