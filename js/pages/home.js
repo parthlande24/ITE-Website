@@ -173,6 +173,14 @@ ${_renderFooter()}
       <div class="form-group"><label class="form-label">Password</label><input id="l-pass" type="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password"></div>
       <button type="submit" id="l-btn" class="btn btn-primary w-full" style="justify-content:center;padding:13px;font-size:1rem;margin-top:6px;">Sign In</button>
     </form>
+    <div style="display:flex;align-items:center;margin:16px 0 12px 0;width:100%">
+      <div style="flex:1;height:1px;background:var(--border-color, #E5E7EB)"></div>
+      <span style="font-size:.75rem;color:var(--text-muted);padding:0 10px">or</span>
+      <div style="flex:1;height:1px;background:var(--border-color, #E5E7EB)"></div>
+    </div>
+    <button type="button" id="guest-login-btn" class="btn btn-ghost w-full" style="justify-content:center;padding:12px;font-size:0.925rem;border:1px solid var(--border-color, #E5E7EB);margin-bottom:8px;">
+      View as Non-ITE (Guest)
+    </button>
     <div class="auth-footer">Don't have an account? <a href="#/register">Register here</a></div>
   </div>
 </div></div>`;
@@ -194,6 +202,24 @@ ${_renderFooter()}
         }
       }, 320);
     });
+
+    document.getElementById('guest-login-btn')?.addEventListener('click', () => {
+      const err = document.getElementById('login-err');
+      const btn = document.getElementById('guest-login-btn');
+      btn.disabled = true; btn.textContent = 'Entering guest mode...';
+      setTimeout(async () => {
+        const res = await ITE.Auth.login("guest@vnit.ac.in", "guest123");
+        if (res.success) {
+          ITE.App.toast('Welcome! Logged in as Guest.', 'success');
+          document.getElementById('page-content').style.padding = '';
+          ITE.App.route();
+        } else {
+          err.style.display='block'; err.textContent = 'Guest login failed: ' + res.error;
+          btn.disabled=false; btn.textContent='View as Non-ITE (Guest)';
+        }
+      }, 320);
+    });
+
     ITE.App.applyTheme(localStorage.getItem('ite_theme') || 'light');
   }
 
