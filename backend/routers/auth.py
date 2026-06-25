@@ -6,6 +6,7 @@ from typing import List, Optional
 from database import get_db
 from models import User, ApprovedStudent
 from auth import verify_password, create_access_token, decode_token, hash_password
+from datetime import timedelta
 import uuid
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -38,6 +39,14 @@ def get_current_user(
     payload = decode_token(credentials.credentials)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+    if payload.get("role") == "non-ite":
+        return User(
+            id="guest",
+            email=payload.get("email", "guest@observer.com"),
+            role="non-ite",
+            name="Guest Observer",
+            profile_complete=True
+        )
     user = db.query(User).filter(User.id == payload.get("sub")).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -53,6 +62,44 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Incorrect password. Please try again.")
     token = create_access_token({"sub": user.id, "role": user.role})
     return {"success": True, "token": token, "user": user_to_dict(user)}
+
+
+class GuestLoginRequest(BaseModel):
+    email: str
+
+
+@router.post("/guest-login")
+def guest_login(body: GuestLoginRequest, db: Session = Depends(get_db)):
+    import re
+    email_regex = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    if not email_regex.match(body.email):
+        raise HTTPException(status_code=400, detail="Invalid email format.")
+    
+    token = create_access_token(
+        {"sub": "guest", "role": "non-ite", "email": body.email},
+        expires_delta=timedelta(hours=2)
+    )
+    
+    guest_user = {
+        "id": "guest",
+        "email": body.email,
+        "role": "non-ite",
+        "name": "Guest Observer",
+        "avatar": "GO",
+        "profileComplete": True,
+        "createdAt": "",
+        "rollNo": "",
+        "branch": "",
+        "skills": [],
+        "interests": [],
+        "teamId": None,
+        "teamRole": None,
+        "isCEO": False,
+        "mentorId": None,
+        "specialization": "",
+        "assignedTeams": []
+    }
+    return {"success": True, "token": token, "user": guest_user}
 
 
 @router.get("/me")

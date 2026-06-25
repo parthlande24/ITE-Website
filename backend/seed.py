@@ -149,8 +149,6 @@ def seed(db: Session):
              role="student", name="Priya Gupta",   avatar="PG", roll_no="24BCE010", branch="Electronics",
              skills=["Marketing Analytics"], interests=["Consumer Tech"],
              profile_complete=True, created_at="2024-06-10"),
-        User(id=uid(), email="guest@vnit.ac.in", password_hash=hash_password("guest123"),
-             role="non-ite", name="Guest Visitor", avatar="GV", profile_complete=True, created_at="2024-06-01"),
     ]
     db.add_all(users)
 

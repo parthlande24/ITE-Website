@@ -53,8 +53,6 @@ class StageRequest(BaseModel):
 
 @router.get("")
 def list_teams(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if current_user.role not in ("admin", "mentor", "student", "non-ite"):
-        raise HTTPException(status_code=403, detail="Role not authorized")
     query = db.query(Team)
     if current_user.role == "student":
         if current_user.team_id:
@@ -63,6 +61,8 @@ def list_teams(db: Session = Depends(get_db), current_user: User = Depends(get_c
             return []
     elif current_user.role == "mentor":
         query = query.filter(Team.mentor_id == current_user.id)
+    elif current_user.role == "non-ite":
+        pass
     return [team_to_dict(t, db) for t in query.all()]
 
 

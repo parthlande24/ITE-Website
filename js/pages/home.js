@@ -167,23 +167,48 @@ ${_renderFooter()}
     </div>
     <div class="auth-form-title">Welcome Back</div>
     <div class="auth-form-subtitle">Sign in to your ITE Startup Launch Pad account</div>
+    
+    <div class="auth-tabs">
+      <button id="tab-ite" class="auth-tab-btn active">ITE Member Login</button>
+      <button id="tab-guest" class="auth-tab-btn">Non-ITE Visitor Login</button>
+    </div>
+
     <div id="login-err" class="form-error-box"></div>
+    
+    <!-- ITE Member Login Form -->
     <form id="login-form">
       <div class="form-group"><label class="form-label">VNIT Email</label><input id="l-email" type="email" class="form-control" placeholder="yourname@vnit.ac.in" required autocomplete="email"></div>
       <div class="form-group"><label class="form-label">Password</label><input id="l-pass" type="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password"></div>
       <button type="submit" id="l-btn" class="btn btn-primary w-full" style="justify-content:center;padding:13px;font-size:1rem;margin-top:6px;">Sign In</button>
     </form>
-    <div style="display:flex;align-items:center;margin:16px 0 12px 0;width:100%">
-      <div style="flex:1;height:1px;background:var(--border-color, #E5E7EB)"></div>
-      <span style="font-size:.75rem;color:var(--text-muted);padding:0 10px">or</span>
-      <div style="flex:1;height:1px;background:var(--border-color, #E5E7EB)"></div>
-    </div>
-    <button type="button" id="guest-login-btn" class="btn btn-ghost w-full" style="justify-content:center;padding:12px;font-size:0.925rem;border:1px solid var(--border-color, #E5E7EB);margin-bottom:8px;">
-      View as Non-ITE (Guest)
-    </button>
-    <div class="auth-footer">Don't have an account? <a href="#/register">Register here</a></div>
+
+    <!-- Guest Login Form (Hidden by default) -->
+    <form id="guest-form" style="display:none;">
+      <div class="form-group"><label class="form-label">Email Address</label><input id="g-email" type="email" class="form-control" placeholder="yourname@gmail.com" required autocomplete="email"></div>
+      <button type="submit" id="g-btn" class="btn btn-primary w-full" style="justify-content:center;padding:13px;font-size:1rem;margin-top:6px;">Explore Startups</button>
+    </form>
+
+    <div class="auth-footer" id="auth-footer-text">Don't have an account? <a href="#/register">Register here</a></div>
   </div>
 </div></div>`;
+
+    document.getElementById('tab-ite').addEventListener('click', () => {
+      document.getElementById('tab-ite').classList.add('active');
+      document.getElementById('tab-guest').classList.remove('active');
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('guest-form').style.display = 'none';
+      document.getElementById('auth-footer-text').style.display = 'block';
+      document.getElementById('login-err').style.display = 'none';
+    });
+
+    document.getElementById('tab-guest').addEventListener('click', () => {
+      document.getElementById('tab-guest').classList.add('active');
+      document.getElementById('tab-ite').classList.remove('active');
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('guest-form').style.display = 'block';
+      document.getElementById('auth-footer-text').style.display = 'none';
+      document.getElementById('login-err').style.display = 'none';
+    });
 
     document.getElementById('login-form').addEventListener('submit', e => {
       e.preventDefault();
@@ -203,23 +228,23 @@ ${_renderFooter()}
       }, 320);
     });
 
-    document.getElementById('guest-login-btn')?.addEventListener('click', () => {
+    document.getElementById('guest-form').addEventListener('submit', e => {
+      e.preventDefault();
       const err = document.getElementById('login-err');
-      const btn = document.getElementById('guest-login-btn');
-      btn.disabled = true; btn.textContent = 'Entering guest mode...';
+      const btn = document.getElementById('g-btn');
+      btn.disabled = true; btn.textContent = 'Processing...';
       setTimeout(async () => {
-        const res = await ITE.Auth.login("guest@vnit.ac.in", "guest123");
+        const res = await ITE.Auth.guestLogin(document.getElementById('g-email').value.trim());
         if (res.success) {
-          ITE.App.toast('Welcome! Logged in as Guest.', 'success');
+          ITE.App.toast('Logged in as Guest Observer.', 'success');
           document.getElementById('page-content').style.padding = '';
           ITE.App.route();
         } else {
-          err.style.display='block'; err.textContent = 'Guest login failed: ' + res.error;
-          btn.disabled=false; btn.textContent='View as Non-ITE (Guest)';
+          err.style.display='block'; err.textContent = res.error;
+          btn.disabled=false; btn.textContent='Explore Startups';
         }
       }, 320);
     });
-
     ITE.App.applyTheme(localStorage.getItem('ite_theme') || 'light');
   }
 

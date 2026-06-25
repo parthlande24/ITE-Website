@@ -40,6 +40,18 @@ ITE.Auth = (function () {
     }
   }
 
+  // ── guestLogin — async, returns {success, user?, error?} ──────────────────
+  async function guestLogin(email) {
+    try {
+      const res = await ITE.API.post('/auth/guest-login', { email });
+      ITE.API.setToken(res.token);
+      _saveUser(res.user);
+      return { success: true, user: res.user };
+    } catch (err) {
+      return { success: false, error: err.message || 'Guest login failed.' };
+    }
+  }
+
   // ── logout ────────────────────────────────────────────────────────────────
   async function logout() {
     try { await ITE.API.post('/auth/logout'); } catch {}
@@ -51,6 +63,9 @@ ITE.Auth = (function () {
   // ── getCurrentUser — sync read from cache ────────────────────────────────
   function getCurrentUser() {
     const cached = _loadCached();
+    if (cached && cached.role === 'non-ite') {
+      return cached;
+    }
     if (cached && cached.email) {
       // FIX: The backend DB seeds random UUIDs which mismatch the frontend localStorage UIDs.
       // To ensure perfect sync on localhost without rewriting everything to hit the backend API,
@@ -101,5 +116,5 @@ ITE.Auth = (function () {
     }
   }
 
-  return { login, logout, getCurrentUser, refreshMe, isLoggedIn, register, updateCurrentUser: _saveUser, clearUser: _clearUser };
+  return { login, guestLogin, logout, getCurrentUser, refreshMe, isLoggedIn, register, updateCurrentUser: _saveUser, clearUser: _clearUser };
 })();

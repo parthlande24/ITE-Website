@@ -75,6 +75,13 @@ ITE.App = (function () {
       return ITE.Pages.Home.render();
     }
 
+    if (user.role === 'non-ite') {
+      const map = {
+        '/admin/startups': () => { setTopbarTitle('Startups'); ITE.Pages.Admin.renderStartups(); },
+      };
+      return (map[hash] || (() => navigate('/admin/startups')))();
+    }
+
     // Authenticated routes
     if (user.role === 'admin') {
       const map = {
@@ -108,13 +115,6 @@ ITE.App = (function () {
       };
       return (map[hash] || map['/'])();
     }
-    if (user.role === 'non-ite') {
-      const map = {
-        '/': () => navigate('/non-ite/dashboard'),
-        '/non-ite/dashboard': () => { setTopbarTitle('Startups Listing'); ITE.Pages.Admin.renderStartups(); }
-      };
-      return (map[hash] || map['/'])();
-    }
     ITE.Pages.Home.render();
   }
 
@@ -133,10 +133,39 @@ ITE.App = (function () {
     const publicHashes = ['/', '/login', '/register', '/all-startups', '/faculty', '/about'];
     const isPublic = !user || publicHashes.includes(hash);
 
+    // Guest topbar logout integration
+    const guestLogoutBtnId = 'guest-logout-btn';
+    let guestBtn = document.getElementById(guestLogoutBtnId);
+    if (user && user.role === 'non-ite') {
+      if (!guestBtn) {
+        const topbarActions = document.querySelector('.topbar-actions');
+        if (topbarActions) {
+          topbarActions.insertAdjacentHTML('beforeend', `
+            <button id="${guestLogoutBtnId}" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:6px;margin-left:8px;color:var(--text-secondary);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>Logout</span>
+            </button>
+          `);
+          document.getElementById(guestLogoutBtnId).addEventListener('click', ITE.Auth.logout);
+        }
+      }
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
+    } else {
+      if (guestBtn) guestBtn.remove();
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      if (mobileMenuBtn) mobileMenuBtn.style.display = '';
+    }
+
     if (isPublic) {
       if (sidebar) sidebar.classList.add('hidden');
       if (topbar) topbar.classList.add('hidden');
       if (pc) pc.style.padding = '0';
+      if (mw) mw.style.marginLeft = '0';
+    } else if (user && user.role === 'non-ite') {
+      if (sidebar) sidebar.classList.add('hidden');
+      if (topbar) topbar.classList.remove('hidden');
+      if (pc) pc.style.padding = '20px';
       if (mw) mw.style.marginLeft = '0';
     } else {
       if (sidebar) sidebar.classList.remove('hidden');
@@ -174,10 +203,6 @@ ITE.App = (function () {
         { icon: ico_check, label: 'Tasks',        path: '/student/tasks' },
         { icon: ico_bell,  label: 'Announcements',path: '/student/announcements' },
       ];
-    } else if (user.role === 'non-ite') {
-      items = [
-        { icon: ico_rocket, label: 'Startups',    path: '/non-ite/dashboard' },
-      ];
     }
     const nav = document.getElementById('sidebar-nav');
     if (!nav) return;
@@ -189,7 +214,7 @@ ITE.App = (function () {
   function buildSidebarUser(user) {
     const el = document.getElementById('sidebar-user');
     if (!el) return;
-    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student', 'non-ite': 'Guest (Non-ITE)' }[user.role] || 'User';
+    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student' }[user.role] || 'User';
     el.innerHTML = `<div class="sidebar-user-info"><div class="sidebar-avatar">${user.avatar || user.name[0]}</div><div><div class="sidebar-user-name">${user.name}</div><div class="sidebar-user-role">${roleLabel}</div></div></div>`;
   }
 
