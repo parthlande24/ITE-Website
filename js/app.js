@@ -93,6 +93,7 @@ ITE.App = (function () {
         '/': () => navigate('/mentor/dashboard'),
         '/mentor/dashboard':     () => { setTopbarTitle('Dashboard');     ITE.Pages.Mentor.renderDashboard(); },
         '/mentor/teams':         () => { setTopbarTitle('My Teams');      ITE.Pages.Mentor.renderTeams(); },
+        '/mentor/tasks':         () => { setTopbarTitle('Tasks');         ITE.Pages.Mentor.renderTasks(); },
         '/mentor/announcements': () => { setTopbarTitle('Announcements'); ITE.Pages.Mentor.renderAnnouncements(); },
       };
       return (map[hash] || map['/'])();
@@ -156,6 +157,7 @@ ITE.App = (function () {
       items = [
         { icon: ico_grid,  label: 'Dashboard',    path: '/mentor/dashboard' },
         { icon: ico_users, label: 'My Teams',     path: '/mentor/teams' },
+        { icon: ico_check, label: 'Tasks',        path: '/mentor/tasks' },
         { icon: ico_bell,  label: 'Announcements',path: '/mentor/announcements' },
       ];
     } else if (user.role === 'student') {

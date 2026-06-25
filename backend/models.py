@@ -92,7 +92,7 @@ class Submission(Base):
     content      = Column(Text, nullable=True)
     file_url     = Column(String, nullable=True)
     status       = Column(String, default="pending")
-    grade        = Column(Float, nullable=True)
+    grade        = Column(String, nullable=True)
     feedback     = Column(Text, nullable=True)
     submitted_at = Column(String, default=lambda: datetime.datetime.utcnow().isoformat())
     graded_at    = Column(String, nullable=True)

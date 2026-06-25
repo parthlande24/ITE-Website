@@ -328,10 +328,176 @@ myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
     }
   }
 
+  async function renderTasks() {
+    ITE.App.pc().innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Loading tasks overview...</div>`;
+    try {
+      const user = ITE.Auth.getCurrentUser();
+      const [tasks, submissions, teams, students] = await Promise.all([
+        ITE.API.get('/tasks'),
+        ITE.API.get('/submissions'),
+        ITE.API.get('/teams'),
+        ITE.API.get('/users/students')
+      ]);
+
+      // Filter tasks assigned by this mentor
+      const myTasks = tasks.filter(t => t.createdById === user.id);
+      
+      // Determine completion status for each task
+      const tasksWithStatus = myTasks.map(t => {
+        const sub = submissions.find(s => s.taskId === t.id);
+        const team = teams.find(tm => tm.id === t.teamId);
+        const student = sub ? students.find(s => s.id === sub.studentId) : null;
+        return {
+          ...t,
+          submission: sub,
+          teamName: team ? team.startupName : 'General / Unknown Team',
+          studentName: student ? student.name : 'Unknown Student'
+        };
+      });
+
+      const totalAssigned = tasksWithStatus.length;
+      const completedCount = tasksWithStatus.filter(t => !!t.submission).length;
+      const completionRate = totalAssigned ? Math.round((completedCount / totalAssigned) * 100) : 0;
+
+      ITE.App.pc().innerHTML = `
+<div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
+  <div><div class="page-title">Tasks Management</div><div class="page-subtitle">Track and grade tasks assigned to your startups</div></div>
+  <button class="btn btn-primary" onclick="ITE.Pages.Mentor.showAssignTaskModal(null, 'all-my-teams')">Assign New Task</button>
+</div>
+
+<div class="stats-grid" style="margin-bottom:24px">
+  <div class="stat-card" style="--c:#2563EB"><div class="stat-value">${totalAssigned}</div><div class="stat-label">Tasks Assigned</div></div>
+  <div class="stat-card" style="--c:#10B981"><div class="stat-value">${completedCount}</div><div class="stat-label">Completed Tasks</div></div>
+  <div class="stat-card" style="--c:#8B5CF6"><div class="stat-value">${completionRate}%</div><div class="stat-label">Completion Rate</div></div>
+</div>
+
+<div class="card" style="margin-bottom:24px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <span style="font-size:.875rem;color:var(--text-secondary)">Task Completion Progress</span>
+    <span style="font-weight:700">${completionRate}%</span>
+  </div>
+  <div class="analytics-bar-track" style="height:10px"><div class="analytics-bar-fill" style="width:${completionRate}%"></div></div>
+</div>
+
+<div class="section-title">Assigned Tasks</div>
+${tasksWithStatus.length === 0 ? `
+<div class="empty-state card">
+  <h3>No tasks assigned yet</h3>
+  <p>Assign tasks to your startups to track their validation and development progress.</p>
+</div>` : `
+<div style="display:grid;gap:16px">
+  ${tasksWithStatus.map(t => {
+    const done = !!t.submission;
+    const stageLabel = t.stage !== null && t.stage !== undefined ? `Stage ${t.stage + 1}: ${ITE.App.STAGES[t.stage]?.label}` : null;
+    return `
+<div class="task-card" style="display:flex;gap:16px;padding:20px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md)">
+  <div class="task-check ${done ? 'done' : ''}" style="margin-top:2px"></div>
+  <div style="flex:1">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 class="task-title" style="font-size:1.05rem;font-weight:700;margin-bottom:4px">${t.title}</h3>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:8px">Assigned to: <strong style="color:var(--text-primary)">${t.teamName}</strong></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${stageLabel ? `<span class="badge badge-blue">${stageLabel}</span>` : ''}
+        ${done ? `<span class="badge badge-green">Completed</span>` : `<span class="badge badge-yellow">Pending</span>`}
+      </div>
+    </div>
+    <p class="task-desc" style="font-size:.875rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">${t.description || 'No description provided.'}</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="font-size:.8rem;color:var(--text-muted)">Due Date: ${new Date(t.dueDate).toLocaleDateString('en-IN')}</div>
+      ${done ? `
+        <button class="btn btn-primary btn-sm" onclick="ITE.Pages.Mentor.showViewSubmissionModal('${t.submission.id}', '${t.title.replace(/'/g, "\\'")}')">View & Grade</button>
+      ` : ''}
+    </div>
+  </div>
+</div>`;
+  }).join('')}
+</div>`}
+`;
+    } catch (err) {
+      ITE.App.pc().innerHTML = `<div style="color:red; padding:20px; background:white;">Error: ${err.message}</div>`;
+    }
+  }
+
+  async function showViewSubmissionModal(subId, taskTitle) {
+    try {
+      const submissions = await ITE.API.get('/submissions');
+      const sub = submissions.find(s => s.id === subId);
+      if (!sub) {
+        ITE.App.toast('Submission not found', 'error');
+        return;
+      }
+      const students = await ITE.API.get('/users/students');
+      const student = students.find(s => s.id === sub.studentId);
+      const studentName = student ? student.name : 'Unknown Student';
+      const studentRoll = student ? student.rollNo : '';
+
+      ITE.App.showModal(`<div class="modal modal-lg">
+<div class="modal-header"><div class="modal-title">Submission: ${taskTitle}</div><button class="modal-close btn">✕</button></div>
+<div class="modal-body">
+  <div style="display:grid;gap:14px">
+    <div style="padding:12px;background:var(--bg-secondary);border-radius:var(--radius-sm)">
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px">Submitted By</div>
+      <div style="font-weight:600;font-size:.9rem">${studentName} ${studentRoll ? `(${studentRoll})` : ''}</div>
+      <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">Submitted: ${new Date(sub.submittedAt).toLocaleString('en-IN')}</div>
+    </div>
+    <div>
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Submission Content</div>
+      <p style="font-size:.9rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card)">${sub.content}</p>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Evaluation & Grading</div>
+    <div class="form-group">
+      <label class="form-label">Grade *</label>
+      <select id="grade-sel" class="form-control">
+        <option value="" ${sub.grade === null ? 'selected' : ''}>Choose grade…</option>
+        ${['A+','A','A-','B+','B','B-','C+','C','Fail'].map(g => `<option value="${g}" ${sub.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Feedback / Comments</label>
+      <textarea id="grade-feedback" class="form-control" rows="3" placeholder="Provide constructive feedback for the team…">${sub.feedback || ''}</textarea>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-ghost" onclick="ITE.App.closeModal()">Cancel</button>
+  <button class="btn btn-primary" onclick="ITE.Pages.Mentor._submitGrade('${sub.id}')">Submit Grade</button>
+</div>
+</div>`);
+    } catch (err) {
+      ITE.App.toast('Failed to load submission details', 'error');
+    }
+  }
+
+  async function _submitGrade(subId) {
+    const grade = document.getElementById('grade-sel')?.value;
+    const feedback = document.getElementById('grade-feedback')?.value?.trim();
+    if (!grade) {
+      ITE.App.toast('Please select a grade.', 'error');
+      return;
+    }
+    try {
+      await ITE.API.patch(`/submissions/${subId}/grade`, {
+        grade,
+        feedback
+      });
+      ITE.App.toast('Submission graded successfully!', 'success');
+      ITE.App.closeModal();
+      renderTasks();
+    } catch (err) {
+      ITE.App.toast(err.message, 'error');
+    }
+  }
+
   return {
-    renderDashboard, renderTeams, renderAnnouncements,
+    renderDashboard, renderTeams, renderAnnouncements, renderTasks,
     showTeamDetail, showAssignCEO, _submitCEO, _advanceStage,
     showMentorAnnModal, _submitMentorAnn,
     showAssignTaskModal, _submitMentorTask,
+    showViewSubmissionModal, _submitGrade,
   };
 })();

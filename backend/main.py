@@ -30,6 +30,12 @@ with engine.connect() as conn:
         print("[DB] Added team_id column to tasks table.")
     except Exception:
         pass
+    try:
+        conn.execute(text("ALTER TABLE submissions ALTER COLUMN grade TYPE VARCHAR;"))
+        conn.commit()
+        print("[DB] Altered grade column to VARCHAR in submissions table.")
+    except Exception:
+        pass
 
 db = SessionLocal()
 seed(db)

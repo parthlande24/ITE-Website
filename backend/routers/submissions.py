@@ -27,7 +27,7 @@ class CreateSubmissionRequest(BaseModel):
 
 
 class GradeRequest(BaseModel):
-    grade: float
+    grade: str
     feedback: Optional[str] = None
 
 
@@ -40,7 +40,12 @@ def all_submissions(db: Session = Depends(get_db), current_user: User = Depends(
 
 @router.get("/my")
 def my_submissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    subs = db.query(Submission).filter(Submission.student_id == current_user.id).all()
+    if current_user.team_id:
+        subs = db.query(Submission).filter(
+            (Submission.student_id == current_user.id) | (Submission.team_id == current_user.team_id)
+        ).all()
+    else:
+        subs = db.query(Submission).filter(Submission.student_id == current_user.id).all()
     return [sub_to_dict(s) for s in subs]
 
 
