@@ -248,9 +248,8 @@ ${_renderFooter()}
           password: document.getElementById('r-pass').value,
         });
         if (res.success) {
-          // Clear auto-login
-          sessionStorage.removeItem('ite_current_user');
-          sessionStorage.removeItem('ite_jwt');
+          // Clear auto-login (including in-memory cache)
+          ITE.Auth.clearUser();
           
           ITE.App.toast('Account created successfully.', 'success');
           document.getElementById('page-content').style.padding='';

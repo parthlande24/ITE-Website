@@ -101,5 +101,5 @@ ITE.Auth = (function () {
     }
   }
 
-  return { login, logout, getCurrentUser, refreshMe, isLoggedIn, register, updateCurrentUser: _saveUser };
+  return { login, logout, getCurrentUser, refreshMe, isLoggedIn, register, updateCurrentUser: _saveUser, clearUser: _clearUser };
 })();
