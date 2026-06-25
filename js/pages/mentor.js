@@ -361,7 +361,7 @@ myTeams.map(t=>_fullTeamView(t, user, students)).join('')}`;
 
       ITE.App.pc().innerHTML = `
 <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
-  <div><div class="page-title">Tasks Management</div><div class="page-subtitle">Track and grade tasks assigned to your startups</div></div>
+  <div><div class="page-title">Tasks Management</div><div class="page-subtitle">Track tasks assigned to your startups</div></div>
   <button class="btn btn-primary" onclick="ITE.Pages.Mentor.showAssignTaskModal(null, 'all-my-teams')">Assign New Task</button>
 </div>
 
@@ -407,7 +407,7 @@ ${tasksWithStatus.length === 0 ? `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div style="font-size:.8rem;color:var(--text-muted)">Due Date: ${new Date(t.dueDate).toLocaleDateString('en-IN')}</div>
       ${done ? `
-        <button class="btn btn-primary btn-sm" onclick="ITE.Pages.Mentor.showViewSubmissionModal('${t.submission.id}', '${t.title.replace(/'/g, "\\'")}')">View & Grade</button>
+        <button class="btn btn-primary btn-sm" onclick="ITE.Pages.Mentor.showViewSubmissionModal('${t.submission.id}', '${t.title.replace(/'/g, "\\'")}')">View Submission</button>
       ` : ''}
     </div>
   </div>
@@ -433,6 +433,8 @@ ${tasksWithStatus.length === 0 ? `
       const studentName = student ? student.name : 'Unknown Student';
       const studentRoll = student ? student.rollNo : '';
 
+      const isViewed = sub.status === 'graded' || sub.status === 'viewed' || sub.grade === 'Viewed';
+
       ITE.App.showModal(`<div class="modal modal-lg">
 <div class="modal-header"><div class="modal-title">Submission: ${taskTitle}</div><button class="modal-close btn">✕</button></div>
 <div class="modal-body">
@@ -446,26 +448,16 @@ ${tasksWithStatus.length === 0 ? `
       <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Submission Content</div>
       <p style="font-size:.9rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card)">${sub.content}</p>
     </div>
-    
-    <div class="divider"></div>
-    
-    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Evaluation & Grading</div>
-    <div class="form-group">
-      <label class="form-label">Grade *</label>
-      <select id="grade-sel" class="form-control">
-        <option value="" ${sub.grade === null ? 'selected' : ''}>Choose grade…</option>
-        ${['A+','A','A-','B+','B','B-','C+','C','Fail'].map(g => `<option value="${g}" ${sub.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Feedback / Comments</label>
-      <textarea id="grade-feedback" class="form-control" rows="3" placeholder="Provide constructive feedback for the team…">${sub.feedback || ''}</textarea>
-    </div>
+    ${isViewed ? `
+      <div style="padding:10px;background:var(--success-light);border-radius:var(--radius-sm);font-size:.85rem;color:var(--success);font-weight:600">✓ Marked as Viewed</div>
+    ` : ''}
   </div>
 </div>
 <div class="modal-footer">
-  <button class="btn btn-ghost" onclick="ITE.App.closeModal()">Cancel</button>
-  <button class="btn btn-primary" onclick="ITE.Pages.Mentor._submitGrade('${sub.id}')">Submit Grade</button>
+  <button class="btn btn-ghost" onclick="ITE.App.closeModal()">Close</button>
+  ${!isViewed ? `
+    <button class="btn btn-primary" onclick="ITE.Pages.Mentor._submitGrade('${sub.id}')">Mark as Viewed</button>
+  ` : ''}
 </div>
 </div>`);
     } catch (err) {
@@ -474,18 +466,12 @@ ${tasksWithStatus.length === 0 ? `
   }
 
   async function _submitGrade(subId) {
-    const grade = document.getElementById('grade-sel')?.value;
-    const feedback = document.getElementById('grade-feedback')?.value?.trim();
-    if (!grade) {
-      ITE.App.toast('Please select a grade.', 'error');
-      return;
-    }
     try {
       await ITE.API.patch(`/submissions/${subId}/grade`, {
-        grade,
-        feedback
+        grade: 'Viewed',
+        feedback: ''
       });
-      ITE.App.toast('Submission graded successfully!', 'success');
+      ITE.App.toast('Submission marked as viewed.', 'success');
       ITE.App.closeModal();
       renderTasks();
     } catch (err) {
