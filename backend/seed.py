@@ -75,31 +75,15 @@ def _seed_real_admins(db: Session):
 
 
 def _remove_demo_accounts(db: Session):
-    """Delete all demo users, teams, tasks, and approved students in production."""
-    removed = 0
-    for email in DEMO_EMAILS:
-        user = db.query(User).filter(User.email == email).first()
-        if user:
-            db.delete(user)
-            removed += 1
-    if removed:
-        db.commit()
-        print(f"[SEED] Removed {removed} demo account(s) from production database.")
-
-    # Also wipe demo teams, tasks, announcements, approved_students
-    for model in [Team, Task, Announcement, ApprovedStudent]:
-        count = db.query(model).delete()
-        if count:
-            print(f"[SEED] Cleared {count} row(s) from {model.__tablename__}.")
-    db.commit()
+    """No-op to prevent accidental deletion of production data."""
+    pass
 
 
 def seed(db: Session):
     is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
 
     if is_production:
-        print("[SEED] Production mode — removing demo data, seeding real admins only.")
-        _remove_demo_accounts(db)
+        print("[SEED] Production mode — seeding real admins only.")
         _seed_real_admins(db)
         return
 
