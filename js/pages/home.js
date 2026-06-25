@@ -471,5 +471,5 @@ ${_renderFooter()}
     }
   }, { passive: true });
 
-  return { render, renderLogin, renderRegister, renderAllStartups, renderFaculty };
+  return { render, renderLogin, renderRegister, renderAllStartups, renderFaculty, renderFooter: _renderFooter };
 })();

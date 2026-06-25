@@ -18,21 +18,26 @@ ITE.Pages.Admin = (function () {
 
       if (isGuest) {
         ITE.App.pc().innerHTML = `
-<div class="page-header"><div class="page-title">Startups Dashboard</div><div class="page-subtitle">${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>
-<div class="stats-grid">
-  <div class="stat-card" style="--c:#10B981"><div class="stat-value">${teams.length}</div><div class="stat-label">Active Teams</div><div class="stat-sub">Startup ventures</div></div>
-</div>
-<div class="two-col" style="grid-template-columns: 1fr;">
-  <div class="card">
-    <div class="card-header"><div class="card-title">Startup Stage Distribution</div></div>
-    ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No startups to display yet.</div>` : STAGES.map((s,i)=>`<div class="analytics-bar"><div class="analytics-bar-label"><span>${s?.label||'Stage'}</span><span>${stageCounts[i]||0}</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${teams.length?((stageCounts[i]||0)/teams.length*100):0}%;background:${i<2?'#10B981':i<4?'#2563EB':'#8B5CF6'}"></div></div></div>`).join('')}
+<div class="guest-layout-wrapper">
+  <div class="guest-content-body">
+    <div class="page-header"><div class="page-title">Startups Dashboard</div><div class="page-subtitle">${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>
+    <div class="stats-grid">
+      <div class="stat-card" style="--c:#10B981"><div class="stat-value">${teams.length}</div><div class="stat-label">Active Teams</div><div class="stat-sub">Startup ventures</div></div>
+    </div>
+    <div class="two-col" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Startup Stage Distribution</div></div>
+        ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No startups to display yet.</div>` : STAGES.map((s,i)=>`<div class="analytics-bar"><div class="analytics-bar-label"><span>${s?.label||'Stage'}</span><span>${stageCounts[i]||0}</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${teams.length?((stageCounts[i]||0)/teams.length*100):0}%;background:${i<2?'#10B981':i<4?'#2563EB':'#8B5CF6'}"></div></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="card mt-6">
+      <div class="card-header"><div class="card-title">Team Rankings</div><a href="#/admin/startups" class="btn btn-ghost btn-sm">View All</a></div>
+      ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No teams available yet.</div>` : `<div class="table-wrapper"><table class="data-table"><thead><tr><th>Rank</th><th>Startup</th><th>Industry</th><th>Mentor</th><th>Stage</th><th>Progress</th></tr></thead><tbody>
+      ${[...teams].sort((a,b)=>(b?.stage||0)-(a?.stage||0)).map((t,i)=>{return`<tr><td><strong>#${i+1}</strong></td><td><div style="font-weight:600">${t?.startupName||'Unnamed'}</div></td><td><span class="badge badge-blue">${(t?.industry||'').split(' ')[0]||'Other'}</span></td><td>${t?.mentorName||'—'}</td><td><span class="badge ${(t?.stage||0)>=4?'badge-green':'badge-blue'}">${STAGES[t?.stage||0]?.label||'Stage'}</span></td><td><div class="mini-progress" style="min-width:90px">${STAGES.map((_,j)=>`<div class="mini-step ${j<(t?.stage||0)?'done':j===(t?.stage||0)?'active':''}"></div>`).join('')}</div></td></tr>`}).join('')}
+      </tbody></table></div>`}
+    </div>
   </div>
-</div>
-<div class="card mt-6">
-  <div class="card-header"><div class="card-title">Team Rankings</div><a href="#/admin/startups" class="btn btn-ghost btn-sm">View All</a></div>
-  ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No teams available yet.</div>` : `<div class="table-wrapper"><table class="data-table"><thead><tr><th>Rank</th><th>Startup</th><th>Industry</th><th>Mentor</th><th>Stage</th><th>Progress</th></tr></thead><tbody>
-  ${[...teams].sort((a,b)=>(b?.stage||0)-(a?.stage||0)).map((t,i)=>{return`<tr><td><strong>#${i+1}</strong></td><td><div style="font-weight:600">${t?.startupName||'Unnamed'}</div></td><td><span class="badge badge-blue">${(t?.industry||'').split(' ')[0]||'Other'}</span></td><td>${t?.mentorName||'—'}</td><td><span class="badge ${(t?.stage||0)>=4?'badge-green':'badge-blue'}">${STAGES[t?.stage||0]?.label||'Stage'}</span></td><td><div class="mini-progress" style="min-width:90px">${STAGES.map((_,j)=>`<div class="mini-step ${j<(t?.stage||0)?'done':j===(t?.stage||0)?'active':''}"></div>`).join('')}</div></td></tr>`}).join('')}
-  </tbody></table></div>`}
+  ${ITE.Pages.Home.renderFooter()}
 </div>`;
       } else {
         ITE.App.pc().innerHTML = `
@@ -131,7 +136,7 @@ ITE.Pages.Admin = (function () {
       const isGuest = ITE.Auth.getCurrentUser()?.role === 'non-ite';
       const addBtn = isGuest ? '' : `<button class="btn btn-primary" onclick="ITE.Pages.Admin.showAddStartup()">Add Startup</button>`;
 
-      ITE.App.pc().innerHTML = `
+      const contentHtml = `
 <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
   <div><div class="page-title">Startups</div><div class="page-subtitle">${teams.length} startup ventures registered</div></div>
   ${addBtn}
@@ -158,6 +163,18 @@ ITE.Pages.Admin = (function () {
   </div>
 </div>`}).join('')}
 </div>`;
+
+      if (isGuest) {
+        ITE.App.pc().innerHTML = `
+<div class="guest-layout-wrapper">
+  <div class="guest-content-body">
+    ${contentHtml}
+  </div>
+  ${ITE.Pages.Home.renderFooter()}
+</div>`;
+      } else {
+        ITE.App.pc().innerHTML = contentHtml;
+      }
     } catch (e) {
       ITE.App.pc().innerHTML = `<div style="color:red; padding:20px; background:white;"><h3>Error boundary caught error:</h3><pre>${e.stack}</pre></div>`;
       console.error(e);

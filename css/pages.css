@@ -1130,4 +1130,28 @@ a.faculty-contact-item:hover { color: var(--accent); }
       border-radius: 50%;
       background: var(--accent);
     }
+
+    /* Guest Layout Styles */
+    .guest-layout-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - var(--topbar-height, 62px));
+      margin: -26px;
+      background: var(--bg);
+    }
+
+    .guest-content-body {
+      flex: 1;
+      padding: 26px;
+    }
+
+    @media (max-width: 768px) {
+      .guest-layout-wrapper {
+        margin: -16px;
+        min-height: calc(100vh - var(--topbar-height, 62px));
+      }
+      .guest-content-body {
+        padding: 16px;
+      }
+    }
   
