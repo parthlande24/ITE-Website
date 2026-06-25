@@ -433,8 +433,6 @@ ${tasksWithStatus.length === 0 ? `
       const studentName = student ? student.name : 'Unknown Student';
       const studentRoll = student ? student.rollNo : '';
 
-      const isViewed = sub.status === 'graded' || sub.status === 'viewed' || sub.grade === 'Viewed';
-
       ITE.App.showModal(`<div class="modal modal-lg">
 <div class="modal-header"><div class="modal-title">Submission: ${taskTitle}</div><button class="modal-close btn">✕</button></div>
 <div class="modal-body">
@@ -448,34 +446,14 @@ ${tasksWithStatus.length === 0 ? `
       <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Submission Content</div>
       <p style="font-size:.9rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card)">${sub.content}</p>
     </div>
-    ${isViewed ? `
-      <div style="padding:10px;background:var(--success-light);border-radius:var(--radius-sm);font-size:.85rem;color:var(--success);font-weight:600">✓ Marked as Viewed</div>
-    ` : ''}
   </div>
 </div>
 <div class="modal-footer">
   <button class="btn btn-ghost" onclick="ITE.App.closeModal()">Close</button>
-  ${!isViewed ? `
-    <button class="btn btn-primary" onclick="ITE.Pages.Mentor._submitGrade('${sub.id}')">Mark as Viewed</button>
-  ` : ''}
 </div>
 </div>`);
     } catch (err) {
       ITE.App.toast('Failed to load submission details', 'error');
-    }
-  }
-
-  async function _submitGrade(subId) {
-    try {
-      await ITE.API.patch(`/submissions/${subId}/grade`, {
-        grade: 'Viewed',
-        feedback: ''
-      });
-      ITE.App.toast('Submission marked as viewed.', 'success');
-      ITE.App.closeModal();
-      renderTasks();
-    } catch (err) {
-      ITE.App.toast(err.message, 'error');
     }
   }
 
@@ -484,6 +462,6 @@ ${tasksWithStatus.length === 0 ? `
     showTeamDetail, showAssignCEO, _submitCEO, _advanceStage,
     showMentorAnnModal, _submitMentorAnn,
     showAssignTaskModal, _submitMentorTask,
-    showViewSubmissionModal, _submitGrade,
+    showViewSubmissionModal,
   };
 })();
