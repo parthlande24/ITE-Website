@@ -13,8 +13,29 @@ ITE.Pages.Admin = (function () {
       const teams = await ITE.API.get('/teams');
       const STAGES = ITE.App.STAGES || [];
       const stageCounts = STAGES.map((_,i) => teams.filter(t=>t?.stage===i).length);
+      const user = ITE.Auth.getCurrentUser();
+      const isGuest = user && user.role === 'non-ite';
 
-      ITE.App.pc().innerHTML = `
+      if (isGuest) {
+        ITE.App.pc().innerHTML = `
+<div class="page-header"><div class="page-title">Startups Dashboard</div><div class="page-subtitle">${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>
+<div class="stats-grid">
+  <div class="stat-card" style="--c:#10B981"><div class="stat-value">${teams.length}</div><div class="stat-label">Active Teams</div><div class="stat-sub">Startup ventures</div></div>
+</div>
+<div class="two-col" style="grid-template-columns: 1fr;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Startup Stage Distribution</div></div>
+    ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No startups to display yet.</div>` : STAGES.map((s,i)=>`<div class="analytics-bar"><div class="analytics-bar-label"><span>${s?.label||'Stage'}</span><span>${stageCounts[i]||0}</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${teams.length?((stageCounts[i]||0)/teams.length*100):0}%;background:${i<2?'#10B981':i<4?'#2563EB':'#8B5CF6'}"></div></div></div>`).join('')}
+  </div>
+</div>
+<div class="card mt-6">
+  <div class="card-header"><div class="card-title">Team Rankings</div><a href="#/admin/startups" class="btn btn-ghost btn-sm">View All</a></div>
+  ${teams.length === 0 ? `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No teams available yet.</div>` : `<div class="table-wrapper"><table class="data-table"><thead><tr><th>Rank</th><th>Startup</th><th>Industry</th><th>Mentor</th><th>Stage</th><th>Progress</th></tr></thead><tbody>
+  ${[...teams].sort((a,b)=>(b?.stage||0)-(a?.stage||0)).map((t,i)=>{return`<tr><td><strong>#${i+1}</strong></td><td><div style="font-weight:600">${t?.startupName||'Unnamed'}</div></td><td><span class="badge badge-blue">${(t?.industry||'').split(' ')[0]||'Other'}</span></td><td>${t?.mentorName||'—'}</td><td><span class="badge ${(t?.stage||0)>=4?'badge-green':'badge-blue'}">${STAGES[t?.stage||0]?.label||'Stage'}</span></td><td><div class="mini-progress" style="min-width:90px">${STAGES.map((_,j)=>`<div class="mini-step ${j<(t?.stage||0)?'done':j===(t?.stage||0)?'active':''}"></div>`).join('')}</div></td></tr>`}).join('')}
+  </tbody></table></div>`}
+</div>`;
+      } else {
+        ITE.App.pc().innerHTML = `
 <div class="page-header"><div class="page-title">Admin Dashboard</div><div class="page-subtitle">${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>
 <div class="stats-grid">
   <div class="stat-card" style="--c:#2563EB"><div class="stat-value" id="dash-stat-students">-</div><div class="stat-label">Total Students</div><div class="stat-sub" id="dash-sub-students">Loading...</div></div>
@@ -40,9 +61,9 @@ ITE.Pages.Admin = (function () {
   </tbody></table></div>`}
 </div>`;
 
-      // Fire both API calls concurrently — single source of truth for announcements
-      fetchDashboardStats();
-      fetchRecentAnnouncements();
+        fetchDashboardStats();
+        fetchRecentAnnouncements();
+      }
     } catch (e) {
       ITE.App.pc().innerHTML = `<div style="color:red; padding:20px; background:white;"><h3>Error boundary caught error:</h3><pre>${e.stack}</pre></div>`;
       console.error(e);
@@ -152,6 +173,11 @@ ITE.Pages.Admin = (function () {
       const editBtn = isGuest ? '' : `<button class="btn btn-ghost" onclick="ITE.Pages.Admin.showEditStartup('${t.id}')">Edit</button>`;
       const deleteBtn = isGuest ? '' : `<button class="btn btn-danger" onclick="ITE.Pages.Admin.deleteStartup('${t.id}')">Delete</button>`;
 
+      const teamMembersSection = isGuest ? '' : `
+    <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Team (${members.length})</div>
+      <div style="display:grid;gap:7px">${members.map(mb=>`<div class="member-card"><div class="member-avatar" style="background:${ITE.App.roleColor(mb.teamRole)}">${mb.user?.avatar||'?'}</div><div class="member-info"><div class="member-name">${mb.user?.name||'?'}</div><div class="member-sub">${mb.user?.roll_no||''} · ${mb.user?.branch||''}</div></div><span class="badge" style="background:${ITE.App.roleColor(mb.teamRole)}20;color:${ITE.App.roleColor(mb.teamRole)}">${mb.teamRole}</span></div>`).join('')}</div>
+    </div>`;
+
       ITE.App.showModal(`<div class="modal modal-lg">
 <div class="modal-header"><div class="modal-title">${t.startupName}</div><button class="modal-close btn">✕</button></div>
 <div class="modal-body">
@@ -160,9 +186,7 @@ ITE.Pages.Admin = (function () {
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px">Problem Statement</div><p style="font-size:.9rem;line-height:1.6;color:var(--text-primary)">${t.problemStatement||'Not provided.'}</p></div>
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px">Description</div><p style="font-size:.875rem;line-height:1.6;color:var(--text-secondary)">${t.solution||'Not provided.'}</p></div>
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Progress</div>${ITE.App.renderProgressTracker(t.stage)}</div>
-    <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Team (${members.length})</div>
-      <div style="display:grid;gap:7px">${members.map(mb=>`<div class="member-card"><div class="member-avatar" style="background:${ITE.App.roleColor(mb.teamRole)}">${mb.user?.avatar||'?'}</div><div class="member-info"><div class="member-name">${mb.user?.name||'?'}</div><div class="member-sub">${mb.user?.roll_no||''} · ${mb.user?.branch||''}</div></div><span class="badge" style="background:${ITE.App.roleColor(mb.teamRole)}20;color:${ITE.App.roleColor(mb.teamRole)}">${mb.teamRole}</span></div>`).join('')}</div>
-    </div>
+    ${teamMembersSection}
     <div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px">Mentor</div><p style="font-size:.9rem">${t.mentorName||'Unassigned'}</p></div>
     ${advanceBtn}
   </div>

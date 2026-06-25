@@ -77,9 +77,11 @@ ITE.App = (function () {
 
     if (user.role === 'non-ite') {
       const map = {
-        '/admin/startups': () => { setTopbarTitle('Startups'); ITE.Pages.Admin.renderStartups(); },
+        '/': () => navigate('/admin/dashboard'),
+        '/admin/dashboard': () => { setTopbarTitle('Dashboard'); ITE.Pages.Admin.renderDashboard(); },
+        '/admin/startups':  () => { setTopbarTitle('Startups');  ITE.Pages.Admin.renderStartups(); },
       };
-      return (map[hash] || (() => navigate('/admin/startups')))();
+      return (map[hash] || map['/'])();
     }
 
     // Authenticated routes
@@ -149,23 +151,14 @@ ITE.App = (function () {
           document.getElementById(guestLogoutBtnId).addEventListener('click', ITE.Auth.logout);
         }
       }
-      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-      if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
     } else {
       if (guestBtn) guestBtn.remove();
-      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-      if (mobileMenuBtn) mobileMenuBtn.style.display = '';
     }
 
     if (isPublic) {
       if (sidebar) sidebar.classList.add('hidden');
       if (topbar) topbar.classList.add('hidden');
       if (pc) pc.style.padding = '0';
-      if (mw) mw.style.marginLeft = '0';
-    } else if (user && user.role === 'non-ite') {
-      if (sidebar) sidebar.classList.add('hidden');
-      if (topbar) topbar.classList.remove('hidden');
-      if (pc) pc.style.padding = '20px';
       if (mw) mw.style.marginLeft = '0';
     } else {
       if (sidebar) sidebar.classList.remove('hidden');
@@ -188,6 +181,11 @@ ITE.App = (function () {
         { icon: ico_badge, label: 'Mentors',      path: '/admin/mentors' },
         { icon: ico_bell,  label: 'Announcements',path: '/admin/announcements' },
         { icon: ico_upload,label: 'CSV Upload',   path: '/admin/csv-upload' },
+      ];
+    } else if (user.role === 'non-ite') {
+      items = [
+        { icon: ico_grid, label: 'Dashboard',     path: '/admin/dashboard' },
+        { icon: ico_rocket, label: 'Startups',    path: '/admin/startups' },
       ];
     } else if (user.role === 'mentor') {
       items = [
@@ -214,7 +212,7 @@ ITE.App = (function () {
   function buildSidebarUser(user) {
     const el = document.getElementById('sidebar-user');
     if (!el) return;
-    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student' }[user.role] || 'User';
+    const roleLabel = { admin: 'Administrator', mentor: 'Mentor', student: user.teamRole || 'Student', 'non-ite': 'Guest Observer' }[user.role] || 'User';
     el.innerHTML = `<div class="sidebar-user-info"><div class="sidebar-avatar">${user.avatar || user.name[0]}</div><div><div class="sidebar-user-name">${user.name}</div><div class="sidebar-user-role">${roleLabel}</div></div></div>`;
   }
 
