@@ -52,6 +52,8 @@ ITE.App = (function () {
       setTimeout(() => {
         updateShell(user, hash);
         executeRoute(user, hash);
+        pc.scrollTop = 0;       // Reset container scroll to top
+        window.scrollTo(0, 0);  // Reset window scroll to top
         pc.classList.add('fade-in');
         // Let browser render content first, then measure nav height
         setTimeout(updateNavHeight, 40);
@@ -59,6 +61,7 @@ ITE.App = (function () {
     } else {
       updateShell(user, hash);
       executeRoute(user, hash);
+      window.scrollTo(0, 0);
       setTimeout(updateNavHeight, 40);
     }
   }
