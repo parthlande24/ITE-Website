@@ -344,21 +344,23 @@ ${_renderFooter()}
     <a href="#/login" class="btn btn-primary btn-sm">Sign In</a>
   </div>
 </nav>
-<div class="all-startups-hero">
-  <h1>ITE Startup Ventures</h1>
-  <p>Innovative startups built by VNIT students and alumni across the years</p>
-  <div class="hero-metrics">
-    <div class="text-center"><div class="hero-metric-val">${all.length}</div><div class="hero-metric-lbl">Total Startups</div></div>
-    <div class="text-center"><div class="hero-metric-val">${all.filter(s=>s.stage==='Funded').length}</div><div class="hero-metric-lbl">Funded</div></div>
-    <div class="text-center"><div class="hero-metric-val">${all.filter(s=>s.stage==='Operating'||s.stage==='Scaling').length}</div><div class="hero-metric-lbl">Operating/Scaling</div></div>
-    <div class="text-center"><div class="hero-metric-val">₹2.5M+</div><div class="hero-metric-lbl">Total Funding</div></div>
+<div class="all-startups-content">
+  <div class="all-startups-hero">
+    <h1>ITE Startup Ventures</h1>
+    <p>Innovative startups built by VNIT students and alumni across the years</p>
+    <div class="hero-metrics">
+      <div class="text-center"><div class="hero-metric-val">${all.length}</div><div class="hero-metric-lbl">Total Startups</div></div>
+      <div class="text-center"><div class="hero-metric-val">${all.filter(s=>s.stage==='Funded').length}</div><div class="hero-metric-lbl">Funded</div></div>
+      <div class="text-center"><div class="hero-metric-val">${all.filter(s=>s.stage==='Operating'||s.stage==='Scaling').length}</div><div class="hero-metric-lbl">Operating/Scaling</div></div>
+      <div class="text-center"><div class="hero-metric-val">₹2.5M+</div><div class="hero-metric-lbl">Total Funding</div></div>
+    </div>
   </div>
+  <div class="filter-chips">
+    <button class="batch-chip btn btn-primary btn-sm" data-batch="all">All Years</button>
+    ${batches.map(b=>`<button class="batch-chip btn btn-ghost btn-sm" data-batch="${b}">Est. ${b}</button>`).join('')}
+  </div>
+  <div class="all-startups-grid" id="as-grid">${all.map(s=>_startupCard(s)).join('')}</div>
 </div>
-<div class="filter-chips">
-  <button class="batch-chip btn btn-primary btn-sm" data-batch="all">All Years</button>
-  ${batches.map(b=>`<button class="batch-chip btn btn-ghost btn-sm" data-batch="${b}">Est. ${b}</button>`).join('')}
-</div>
-<div class="all-startups-grid" id="as-grid">${all.map(s=>_startupCard(s)).join('')}</div>
 ${_renderFooter()}
 </div>`;
 

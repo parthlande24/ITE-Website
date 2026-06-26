@@ -270,7 +270,16 @@
 .home-footer-copy { font-size: 0.72rem; color: #4A5A6A; margin-top: 26px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 20px; }
 
 /* ===== ALL STARTUPS PAGE ===== */
-.all-startups-page { min-height: 100vh; background: var(--bg); padding-top: 68px; }
+.all-startups-page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding-top: 68px;
+  display: flex;
+  flex-direction: column;
+}
+.all-startups-content {
+  flex: 1;
+}
 .all-startups-hero {
   background: linear-gradient(135deg, var(--navy) 0%, #1a2f6a 100%);
   padding: 56px 48px; text-align: center;
