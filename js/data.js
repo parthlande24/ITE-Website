@@ -18,6 +18,99 @@ ITE.Data = (function () {
 
   /* ---- Seed ---- */
   function seed() {
+    // One-time data upgrade for real campus startups
+    if (!localStorage.getItem('ite_prev_startups_v3')) {
+      const prevStartups = [
+        {
+          id: uid(),
+          name: 'Lucid Implants',
+          tagline: 'Advanced medical implant solutions',
+          description: 'Lucid Implants develops advanced medical implant solutions, leveraging engineering expertise to improve patient outcomes and push the boundaries of biomedical innovation.',
+          founder: 'Dr. Pranav Sapkal',
+          industry: 'Healthcare',
+          emoji: '🩺',
+          color: '#2563EB',
+          batch: '2021',
+          team: 'Dr. Pranav Sapkal',
+          achievement: 'Biomedical Innovation Leader',
+          members: ['Dr. Pranav Sapkal'],
+          stage: 'Operating',
+          logoText: 'LUCID',
+          logoUrl: 'assets/lucid_logo.png'
+        },
+        {
+          id: uid(),
+          name: 'DonateKart',
+          tagline: 'India\'s leading crowdfunding and donation platform for social causes',
+          description: 'DonateKart is India\'s leading crowdfunding and donation platform for social causes, connecting generous donors with verified NGOs and grassroots initiatives across the country.',
+          founder: 'Anil Kumar Reddy & Sandeep Sharma',
+          industry: 'Social Commerce',
+          emoji: '🧡',
+          color: '#FF5A00',
+          batch: '2016',
+          team: 'Anil Kumar Reddy & Sandeep Sharma',
+          achievement: 'Crowdfunding Leader',
+          members: ['Anil Kumar Reddy', 'Sandeep Sharma'],
+          stage: 'Operating',
+          logoText: 'DONATE KART',
+          logoUrl: 'assets/donatekart_logo.png'
+        },
+        {
+          id: uid(),
+          name: 'Bookstaken',
+          tagline: 'Transforming how readers discover, share, and engage with books',
+          description: 'Bookstaken is a platform aimed at transforming how readers discover, share, and engage with books, making literary experiences more accessible and community-driven.',
+          founder: 'Dhiraj Bodade',
+          industry: 'EdTech',
+          emoji: '📚',
+          color: '#0EA5E9',
+          batch: '2023',
+          team: 'Dhiraj Bodade',
+          achievement: 'Community-Driven Reading Platform',
+          members: ['Dhiraj Bodade'],
+          stage: 'Operating',
+          logoText: 'Bookstaken',
+          logoUrl: 'assets/bookstaken_logo.png'
+        },
+        {
+          id: uid(),
+          name: 'Kein',
+          tagline: 'Video-first social commerce platform',
+          description: 'Kein is a video-first social commerce platform that helps customers discover products through influencers and live sellers, moving beyond traditional product listings and reviews.',
+          founder: 'Prashant',
+          industry: 'E-Commerce',
+          emoji: '🛍️',
+          color: '#10B981',
+          batch: '2024',
+          team: 'Prashant',
+          achievement: 'Video-First E-Commerce Innovator',
+          members: ['Prashant'],
+          stage: 'Operating',
+          logoText: 'Kein',
+          logoUrl: 'assets/kein_logo.png'
+        },
+        {
+          id: uid(),
+          name: 'Atyant',
+          tagline: 'Student-led campus innovation solutions from VNIT',
+          description: 'Atyant is a student-led startup from VNIT focused on innovative solutions, representing the next generation of entrepreneurship emerging directly from the campus ecosystem.',
+          founder: 'Nitin Rai',
+          industry: 'Smart Cities',
+          emoji: '🚀',
+          color: '#8B5CF6',
+          batch: '2025',
+          team: 'Nitin Rai',
+          achievement: 'VNIT Incubation Program',
+          members: ['Nitin Rai (Current VNIT Student)'],
+          stage: 'Operating',
+          logoText: 'अत्यanT',
+          logoUrl: 'assets/atyant_logo.png'
+        }
+      ];
+      localStorage.setItem('ite_prev_startups', JSON.stringify(prevStartups));
+      localStorage.setItem('ite_prev_startups_v3', 'true');
+    }
+
     if (get(K.init)) return;
 
     const aId1 = uid(), aId2 = uid();
@@ -89,13 +182,91 @@ ITE.Data = (function () {
     ];
 
     const prevStartups = [
-      {id:uid(),name:'EduTech Pro',tagline:'Democratizing quality education for rural India',description:'An AI-driven personalized learning platform that reached 50,000+ students in rural Maharashtra through vernacular language support and offline-first technology.',industry:'Education',emoji:'📚',color:'#2563EB',batch:'2023',team:'Team Alpha',achievement:'Raised ₹25L Seed Funding',members:['Rahul S.','Priya M.','Akash V.','Sneha P.'],stage:'Funded'},
-      {id:uid(),name:'GreenCycle',tagline:'Closing the loop on urban waste management',description:'A circular economy platform connecting urban households with recyclers, creating a cashback incentive model that processed 200+ tonnes of recyclable waste.',industry:'Sustainability',emoji:'♻️',color:'#10B981',batch:'2023',team:'Team Evergreen',achievement:'NASSCOM Finalist 2023',members:['Kavya R.','Nikhil J.','Aditya B.'],stage:'Incubated'},
-      {id:uid(),name:'HealthBridge',tagline:'Your digital health companion',description:'A telemedicine and health record management platform connecting rural patients with specialist doctors, processing 10,000+ consultations across Maharashtra.',industry:'Healthcare',emoji:'🏥',color:'#EF4444',batch:'2022',team:'Team Medics',achievement:'IIM Nagpur Social Impact Award',members:['Pooja D.','Aryan S.','Meera K.','Rohit P.'],stage:'Operating'},
-      {id:uid(),name:'AgriSmart',tagline:'Precision farming for the modern era',description:'IoT-powered precision agriculture platform using drone imaging and soil sensors to optimize crop yields. Deployed across 500+ acres in Vidarbha.',industry:'Agriculture',emoji:'🌾',color:'#F59E0B',batch:'2022',team:'Team Harvest',achievement:'Agri-Innovation Challenge Winner',members:['Sanjay K.','Ritu V.','Manoj L.'],stage:'Scaling'},
-      {id:uid(),name:'FinFlow',tagline:'Simplifying financial access for SMEs',description:'A fintech platform providing instant credit scoring and micro-loans to small businesses using alternative data analytics, disbursing ₹2Cr+ in loans.',industry:'Fintech',emoji:'💰',color:'#8B5CF6',batch:'2021',team:'Team Catalyst',achievement:'RBI Sandbox Participant',members:['Amit G.','Shruti T.','Vivek N.','Anita R.'],stage:'Funded'},
-      {id:uid(),name:'SafePath',tagline:'Making cities safer for women',description:'A women safety platform with real-time location sharing, emergency alerts, and community watch features. Active in 5 cities with 15,000+ registered users.',industry:'Safety Tech',emoji:'🛡️',color:'#EC4899',batch:'2021',team:'Team Shield',achievement:'MeitY Selected Startup',members:['Divya S.','Lalit M.','Neha P.'],stage:'Operating'},
-      {id:uid(),name:'WasteWise',tagline:'Smart waste collection for smarter cities',description:'An IoT-based smart waste management solution using sensor-equipped bins and optimal route planning, reducing collection costs by 35%.',industry:'Smart Cities',emoji:'🏙️',color:'#0D9488',batch:'2020',team:'Team Clean',achievement:'Smart City Mission Partner',members:['Rakesh B.','Sonali D.','Harsh V.','Preeti K.'],stage:'Incubated'},
+      {
+        id: uid(),
+        name: 'Lucid Implants',
+        tagline: 'Advanced medical implant solutions',
+        description: 'Lucid Implants develops advanced medical implant solutions, leveraging engineering expertise to improve patient outcomes and push the boundaries of biomedical innovation.',
+        founder: 'Dr. Pranav Sapkal',
+        industry: 'Healthcare',
+        emoji: '🩺',
+        color: '#2563EB',
+        batch: '2021',
+        team: 'Dr. Pranav Sapkal',
+        achievement: 'Biomedical Innovation Leader',
+        members: ['Dr. Pranav Sapkal'],
+        stage: 'Operating',
+        logoText: 'LUCID',
+        logoUrl: 'assets/lucid_logo.png'
+      },
+      {
+        id: uid(),
+        name: 'DonateKart',
+        tagline: 'India\'s leading crowdfunding and donation platform for social causes',
+        description: 'DonateKart is India\'s leading crowdfunding and donation platform for social causes, connecting generous donors with verified NGOs and grassroots initiatives across the country.',
+        founder: 'Anil Kumar Reddy & Sandeep Sharma',
+        industry: 'Social Commerce',
+        emoji: '🧡',
+        color: '#FF5A00',
+        batch: '2016',
+        team: 'Anil Kumar Reddy & Sandeep Sharma',
+        achievement: 'Crowdfunding Leader',
+        members: ['Anil Kumar Reddy', 'Sandeep Sharma'],
+        stage: 'Operating',
+        logoText: 'DONATE KART',
+        logoUrl: 'assets/donatekart_logo.png'
+      },
+      {
+        id: uid(),
+        name: 'Bookstaken',
+        tagline: 'Transforming how readers discover, share, and engage with books',
+        description: 'Bookstaken is a platform aimed at transforming how readers discover, share, and engage with books, making literary experiences more accessible and community-driven.',
+        founder: 'Dhiraj Bodade',
+        industry: 'EdTech',
+        emoji: '📚',
+        color: '#0EA5E9',
+        batch: '2023',
+        team: 'Dhiraj Bodade',
+        achievement: 'Community-Driven Reading Platform',
+        members: ['Dhiraj Bodade'],
+        stage: 'Operating',
+        logoText: 'Bookstaken',
+        logoUrl: 'assets/bookstaken_logo.png'
+      },
+      {
+        id: uid(),
+        name: 'Kein',
+        tagline: 'Video-first social commerce platform',
+        description: 'Kein is a video-first social commerce platform that helps customers discover products through influencers and live sellers, moving beyond traditional product listings and reviews.',
+        founder: 'Prashant',
+        industry: 'E-Commerce',
+        emoji: '🛍️',
+        color: '#10B981',
+        batch: '2024',
+        team: 'Prashant',
+        achievement: 'Video-First E-Commerce Innovator',
+        members: ['Prashant'],
+        stage: 'Operating',
+        logoText: 'Kein',
+        logoUrl: 'assets/kein_logo.png'
+      },
+      {
+        id: uid(),
+        name: 'Atyant',
+        tagline: 'Student-led campus innovation solutions from VNIT',
+        description: 'Atyant is a student-led startup from VNIT focused on innovative solutions, representing the next generation of entrepreneurship emerging directly from the campus ecosystem.',
+        founder: 'Nitin Rai',
+        industry: 'Smart Cities',
+        emoji: '🚀',
+        color: '#8B5CF6',
+        batch: '2025',
+        team: 'Nitin Rai',
+        achievement: 'VNIT Incubation Program',
+        members: ['Nitin Rai (Current VNIT Student)'],
+        stage: 'Operating',
+        logoText: 'अत्यanT',
+        logoUrl: 'assets/atyant_logo.png'
+      }
     ];
 
     set(K.users, users); set(K.approved, approved); set(K.teams, teams);

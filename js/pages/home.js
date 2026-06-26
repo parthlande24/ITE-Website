@@ -132,7 +132,23 @@ ITE.Pages.Home = (function () {
       <a href="#/all-startups" class="btn btn-primary">View All Startups</a>
     </div>
     <div class="startup-cards-row">
-      ${latest5.map(s=>`<div class="startup-card"><div class="startup-card-top" style="background:linear-gradient(135deg,${s.color}22,${s.color}44)">${s.emoji}</div><div class="startup-card-body"><div class="startup-card-name">${s.name}</div><div class="startup-card-desc">${s.tagline}</div><div class="startup-card-footer"><span class="badge badge-blue">Batch ${s.batch}</span><span class="badge" style="background:${s.color}22;color:${s.color}">${s.stage}</span></div></div></div>`).join('')}
+      ${latest5.map(s=>`
+      <div class="startup-card">
+        <div class="startup-card-top" style="background:${s.color}12; padding: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 110px;">
+          ${s.logoUrl ? `<img src="${s.logoUrl}" alt="${s.name} Logo" style="max-height: 75px; max-width: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />` : ''}
+          <div class="startup-card-logo-fallback" style="font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; color:${s.color}; display: ${s.logoUrl ? 'none' : 'flex'}; align-items: center; justify-content: center; text-align: center; text-transform: uppercase;">
+            ${s.logoText || s.name}
+          </div>
+        </div>
+        <div class="startup-card-body">
+          <div class="startup-card-name">${s.name}</div>
+          <div class="startup-card-desc">${s.tagline}</div>
+          <div class="startup-card-footer">
+            <span class="badge badge-blue">Est. ${s.batch}</span>
+            <span class="badge" style="background:${s.color}22;color:${s.color}">${s.stage}</span>
+          </div>
+        </div>
+      </div>`).join('')}
     </div>
   </div>
 </section>
@@ -330,7 +346,7 @@ ${_renderFooter()}
 </nav>
 <div class="all-startups-hero">
   <h1>ITE Startup Ventures</h1>
-  <p>Innovative startups built by VNIT students across ${batches.length} batches of the ITE program</p>
+  <p>Innovative startups built by VNIT students and alumni across the years</p>
   <div class="hero-metrics">
     <div class="text-center"><div class="hero-metric-val">${all.length}</div><div class="hero-metric-lbl">Total Startups</div></div>
     <div class="text-center"><div class="hero-metric-val">${all.filter(s=>s.stage==='Funded').length}</div><div class="hero-metric-lbl">Funded</div></div>
@@ -339,8 +355,8 @@ ${_renderFooter()}
   </div>
 </div>
 <div class="filter-chips">
-  <button class="batch-chip btn btn-primary btn-sm" data-batch="all">All Batches</button>
-  ${batches.map(b=>`<button class="batch-chip btn btn-ghost btn-sm" data-batch="${b}">Batch ${b}</button>`).join('')}
+  <button class="batch-chip btn btn-primary btn-sm" data-batch="all">All Years</button>
+  ${batches.map(b=>`<button class="batch-chip btn btn-ghost btn-sm" data-batch="${b}">Est. ${b}</button>`).join('')}
 </div>
 <div class="all-startups-grid" id="as-grid">${all.map(s=>_startupCard(s)).join('')}</div>
 ${_renderFooter()}
@@ -362,7 +378,7 @@ ${_renderFooter()}
     return `<div class="startup-full-card">
   <div class="startup-full-header" style="background:linear-gradient(135deg,${s.color},${s.color}99)">
     <div class="startup-full-icon" style="color:#FFF;font-weight:800;font-family:var(--font-display);font-size:1.5rem">${s.name[0]}</div>
-    <div><div class="startup-full-hname">${s.name}</div><div class="startup-full-hsub">Batch ${s.batch} &nbsp;·&nbsp; ${s.team}</div></div>
+    <div><div class="startup-full-hname">${s.name}</div><div class="startup-full-hsub">Established ${s.batch} &nbsp;·&nbsp; Founder: ${s.founder || s.team}</div></div>
   </div>
   <div class="startup-full-body">
     <div class="detail-row"><div class="detail-lbl">Tagline</div><div class="detail-val" style="font-style:italic;color:var(--text-secondary)">&ldquo;${s.tagline}&rdquo;</div></div>
