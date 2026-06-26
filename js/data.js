@@ -19,7 +19,7 @@ ITE.Data = (function () {
   /* ---- Seed ---- */
   function seed() {
     // One-time data upgrade for real campus startups
-    if (!localStorage.getItem('ite_prev_startups_v3')) {
+    if (!localStorage.getItem('ite_prev_startups_v4')) {
       const prevStartups = [
         {
           id: uid(),
@@ -108,7 +108,7 @@ ITE.Data = (function () {
         }
       ];
       localStorage.setItem('ite_prev_startups', JSON.stringify(prevStartups));
-      localStorage.setItem('ite_prev_startups_v3', 'true');
+      localStorage.setItem('ite_prev_startups_v4', 'true');
     }
 
     if (get(K.init)) return;
